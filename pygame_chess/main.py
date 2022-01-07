@@ -3,21 +3,44 @@ import pygame
 import move
 import data
 import gui
-from stockfish import Stockfish
+import socket, pickle
 from data import v2
 
-engine = Stockfish("stockfish")
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind((socket.gethostname(), 25565))
+s.listen(5)
+
+HEADERSIZE = 10
+
+players = []
+
+
+while len(players) < 2:
+    clientsocket, address = s.accept()
+
+    ip = address[0]
+    port = address[1]
+    print(f'connection established with {ip} at port {port}')
+    client = data.client(clientsocket, ip)
+    players.append(client)
+
+
+
 
 with open("data.txt") as dat:
-    dat = json.load(dat)
-    piecedict = dat["piecedict"]
-    boardlayout = dat["boardlayout"]
+  dat = json.load(dat)
+  piecedict = dat["piecedict"]
+  boardlayout = dat["boardlayout"]
 
 pygame.init()
 
-displayscale = 100
 
 board = data.board(boardlayout, piecedict)
+displayscale = 100
+
+players[0].send(HEADERSIZE, pickle.dumps(["hello","s1"]))
+players[1].send(HEADERSIZE, pickle.dumps(["hello","s2"]))
+
 
 boardImg = pygame.image.load('board.png')
 piecesImg = pygame.image.load('pieces.png')
@@ -34,9 +57,6 @@ checkImg = pygame.transform.scale(checkImg, (displayscale, displayscale))
 clock = pygame.time.Clock()
 crashed = False
 backtrack = True
-
-againststockfish = False
-playercolour = "black"
 
 offset = v2(0, 0)
 gameDisplay = pygame.display.set_mode((8 * displayscale, 8 * displayscale))
@@ -64,143 +84,60 @@ v2_movepiece = v2(0,0)
 v2_oldpiece = v2(0,0)
 
 
-board.piecestaken = {"black": [], "white": []}
-
-engine.set_skill_level(9)
+piecestaken = {"black": [], "white": []}
 
 while not crashed:
+    command = ""
     colour = colours[gamestage % 2]
 
-    if againststockfish and colour == other[playercolour]:
 
 
-        engine.set_position(board.gethistoryhash())
+    command = players[gamestage%2].recieve(HEADERSIZE)
 
-        movehash = engine.get_best_move_time(1000)
-
-
-        enginemove = data.move(board,v2.zero, v2.zero, hash = movehash)
-        if enginemove.fropiece == "pawn":
-            if enginemove.to.y == 7:
-                enginemove.createpiece = data.piece(piecedict, "2")
-            if enginemove.to.y == 0:
-                enginemove.createpiece = data.piece(piecedict, "8")
-
-        enginemove.perform(board)
-
-        if enginemove.topiece.name != "":
-            board.piecestaken[colour].append({"gamestage": gamestage, "name": enginemove.topiece.name})
-            print(board.piecestaken)
-
-        board.history.append(enginemove)
+    if command != "":
 
 
-        gameDisplay.fill((255, 255, 255))
-        gameDisplay.blit(boardImg, (offset.x, offset.y))
-        gui.displayBoard(displayscale, pieceImgdict, board, gameDisplay, piecesImg, offset)
-
-        kingpos = board.getkingpos(playercolour)
-        if move.checkpos(board, kingpos):
-            gameDisplay.blit(checkImg, (kingpos.x * displayscale + offset.x, kingpos.y * displayscale + offset.y))
-            print(other[colour], " is in check")
-            board.check = True
-            if move.checkcheckmate(board, other[colour], kingpos):
-                print("checkmate,", colour, "has won")
-                if other[colour] == other[playercolour]:
-                    crashed = True
-
-        else:
-            board.check = False
-            if move.checkcheckmate(board, other[colour], kingpos):
-                print("stalemate its a draw!")
-                if other[colour] == other[playercolour]:
-                    crashed = True
-
-
-
-        gamestage+=1
-        continue
-
-    waitevent = pygame.event.wait()
-
-    if waitevent.type == pygame.QUIT:
-        crashed = True
-
-    if waitevent.type == pygame.KEYDOWN:
-
-        if waitevent.key == pygame.K_c:
-
-            againststockfish = not againststockfish
-            continue
-
-
-        if waitevent.key == pygame.K_SPACE and gamestage >= 1 and not againststockfish:
-            # roll back
-            gameDisplay.fill((255, 255, 255))
-            gameDisplay.blit(boardImg, (offset.x, offset.y))
-
-            gamestage -= 1
-            board.history[len(board.history) - 1].unperform(board)
-            del board.history[len(board.history) - 1]
-
-            for key in board.piecestaken:
-                takenpieces = board.piecestaken[key]
-                for i in range(len(takenpieces)):
-                    if takenpieces[i]["gamestage"] >= gamestage:
-                        del takenpieces[i]
-
-
-        gui.displayBoard(displayscale, pieceImgdict, board, gameDisplay, piecesImg, offset)
-
-
-    elif waitevent.type == pygame.MOUSEBUTTONDOWN:
-        x, y = pygame.mouse.get_pos()
-        x = (x - offset.x) // displayscale
-        y = (y - offset.y) // displayscale
-        if not (x in range(0, 8) and y in range(0, 8)):  ## if mouse out of bounds dont get pos
-            continue
+        x,y = int(command[0]) , int(command[1])
+        print(f'client {gamestage % 2} clicked at {x, y} in gamestage {gamestage, deselect}')
 
         v2_piece = v2(x, y)
         piece = board.getpiece(v2_piece)
 
         if pawnswap:
 
-            gameDisplay.fill((255, 255, 255))
-            gameDisplay.blit(boardImg, (offset.x, offset.y))
+
+            #gameDisplay.fill((255, 255, 255))
+            #gameDisplay.blit(boardImg, (offset.x, offset.y))
+            players[0].send(HEADERSIZE, pickle.dumps(["clearboard"]))
+            players[1].send(HEADERSIZE, pickle.dumps(["clearboard"]))
 
             # v2_oldpiece
             oldpiece = board.getpiece(v2_oldpiece)
             d = pawndirection[oldpiece.colour]
 
-
-
-            piecechoices = [v2(v2_movepiece.x, v2_movepiece.y + (0 * d)),
-                            v2(v2_movepiece.x, v2_movepiece.y + (1 * d)),
-                            v2(v2_movepiece.x, v2_movepiece.y + (2 * d)),
-                            v2(v2_movepiece.x, v2_movepiece.y + (3 * d))]
+            piecechoices = [v2(v2_movepiece.x, v2_movepiece.y + (0 * d)), v2(v2_movepiece.x, v2_movepiece.y + (1 * d)),
+                            v2(v2_movepiece.x, v2_movepiece.y + (2 * d)), v2(v2_movepiece.x, v2_movepiece.y + (3 * d))]
 
             pieceids = {0: "8", 1: "10", 2: "11", 3: "9", 4: "3", 5: "5", 6: "4", 7: "2"}
             pawnids = {"white": "6", "black": "12"}
 
             if v2_piece.inlist(piecechoices):  # if clicked on one of the options
-                promotionpiece = data.piece(piecedict, pieceids[v2_piece.y])
-                mov = data.move(board, v2_movepiece, v2_oldpiece, createpiece= promotionpiece)
 
                 movepiece = board.getpiece(v2_movepiece)
 
                 if movepiece.name != "":  # if movement spot is a enemy piece
-                    board.piecestaken[colour].append({"gamestage" : gamestage ,"name" : piece.name})  # add to piece to the players taken pile
-                    print(board.piecestaken)
+                    piecestaken[colour].append({"gamestage" : gamestage ,"name" : piece.name})  # add to piece to the players taken pile
+                    print(piecestaken)
 
+                id = pieceids[v2_piece.y]
 
-                mov.perform(board)
-                engine.set_position([mov.hash])
-                board.history.append(mov)
-                #board.overwritepos(v2_oldpiece, data.piece(piecedict, "0"))  # set the pawns old place to empty
-                #board.overwritepos(v2_movepiece, data.piece(piecedict, id))  # set the pawns new place to the option
+                board.overwritepos(v2_oldpiece, data.piece(piecedict, "0"))  # set the pawns old place to empty
+                board.overwritepos(v2_movepiece, data.piece(piecedict, id))  # set the pawns new place to the option
+                board.saveboard(gamestage)
 
-
-                gui.displayBoard(displayscale, pieceImgdict, board, gameDisplay, piecesImg, offset)
+                players[0].send(HEADERSIZE, pickle.dumps(["displayboard", board.board]))
+                players[1].send(HEADERSIZE, pickle.dumps(["displayboard", board.board]))
+                #gui.displayBoard(displayscale, pieceImgdict, board, gameDisplay, piecesImg, offset)
 
                 if oldpiece.colour != "none":
                     kingpos = board.getkingpos(other[oldpiece.colour])
@@ -208,19 +145,21 @@ while not crashed:
                     if move.checkpos(board, kingpos):
                         print(other[oldpiece.colour], " is in check")
                         board.check = True
-                        if move.checkcheckmate(board, other[colour], kingpos):
+                        if move.checkcheckmate(board, kingpos):
                             print("checkmate,", oldpiece.colour, "has won")
                     else:
                         board.check = False
-                        if move.checkcheckmate(board, other[colour], kingpos):
+                        if move.checkcheckmate(board, kingpos):
                             print("stalemate its a draw!")
 
                 gamestage += 1
 
             else:  # if clicked off
-                # UNPERFORM MOVE
+                board.overwritepos(v2_oldpiece, data.piece(piecedict, pawnids[oldpiece.colour]))
 
-                gui.displayBoard(displayscale, pieceImgdict, board, gameDisplay, piecesImg, offset)
+                players[0].send(HEADERSIZE, pickle.dumps(["displayboard", board.board]))
+                players[1].send(HEADERSIZE, pickle.dumps(["displayboard", board.board]))
+                #gui.displayBoard(displayscale, pieceImgdict, board, gameDisplay, piecesImg, offset)
 
                 pawnswap = False
                 deselect = True
@@ -238,22 +177,36 @@ while not crashed:
 
             if deselect:  # clicked off piece
 
-                gameDisplay.fill((255, 255, 255))
-                gameDisplay.blit(boardImg, (offset.x, offset.y))
+                #gameDisplay.fill((255, 255, 255))
+                #gameDisplay.blit(boardImg, (offset.x, offset.y))
 
-                if v2_piece.inmoveslist(moves):  # if clicked on a movement spot
-                    mov = move.searchmove(moves, v2_piece)
+
+
+
+                if v2_piece.inlist(moves):  # if clicked on a movement spot
+
+                    players[0].send(HEADERSIZE, pickle.dumps(["clearboard"]))
+                    players[1].send(HEADERSIZE, pickle.dumps(["clearboard"]))
+                    print("sending clear board to clients 1 and 2")
+
                     oldpiece = board.getpiece(v2_oldpiece)
                     v2_movepiece = v2_piece
 
                     if oldpiece.name == "pawn" and v2_piece.y == 0:
-                        gui.displaypawnswap(displayscale, pieceImgdict, piecesImg, v2_piece, gameDisplay, offset)
+                        #gui.displaypawnswap(displayscale, pieceImgdict, piecesImg, v2_piece, gameDisplay, offset)
+
+                        players[gamestage % 2].send(HEADERSIZE, pickle.dumps(["displaypawnpromo", [v2_piece.x, v2_piece.y]]))
+
                         pawnswap = True
                         continue
                     if oldpiece.name == "pawn" and v2_piece.y == 7:
-                        gui.displaypawnswap(displayscale, pieceImgdict, piecesImg, v2_piece, gameDisplay, offset)
+                        #gui.displaypawnswap(displayscale, pieceImgdict, piecesImg, v2_piece, gameDisplay, offset)
+
+                        players[gamestage % 2].send(HEADERSIZE, pickle.dumps(["displaypawnpromo", [v2_piece.x, v2_piece.y]]))
+
                         pawnswap = True
                         continue
+
                     if oldpiece.name == "pawn" and v2_piece.y == v2_oldpiece.y - (2 * pawndirection[oldpiece.colour]):
 
                         board.pawnenpassan = True
@@ -262,46 +215,84 @@ while not crashed:
                         board.pawnenpassan = False
 
                     if piece.name != "":  # if movement spot is a enemy piece
-                        board.piecestaken[colour].append({"gamestage" : gamestage ,"name" : piece.name})  # add to piece to the players taken pile
-                        print(board.piecestaken)
+                        piecestaken[colour].append({"gamestage" : gamestage ,"name" : piece.name})  # add to piece to the players taken pile
+                        print(piecestaken)
 
-                    ## PERFORM MOVE
-                    mov.perform(board)
-                    engine.set_position([mov.hash])
+                    board.overwritepos(v2_oldpiece, data.piece(piecedict, "0"))
+                    board.overwritepos(v2_piece, data.piece(piecedict, oldpiece.id))  # replace piece
 
-                    board.history.append(mov)
+                    if oldpiece.name == "pawn" and piece.name == "" and v2_piece.y == v2_oldpiece.y - pawndirection[
+                        oldpiece.colour] and v2_piece.x == v2_oldpiece.x + 1:  # pawn passan right
+                        v2_oldpawn = v2(v2_piece.x, v2_piece.y + pawndirection[oldpiece.colour])
+                        piecestaken[colour].append({"gamestage" : gamestage ,"name" : board.getpiece(v2_oldpawn).name})  # add to piece to the players taken pile
+                        print(piecestaken)
+                        board.overwritepos(v2_oldpawn, data.piece(piecedict, "0"))
+                        board.pawnenpassandone = False
+                    if oldpiece.name == "pawn" and piece.name == "" and v2_piece.y == v2_oldpiece.y - pawndirection[
+                        oldpiece.colour] and v2_piece.x == v2_oldpiece.x - 1:  # pawn passan left
+                        v2_oldpawn = v2(v2_piece.x, v2_piece.y + pawndirection[oldpiece.colour])
+                        piecestaken[colour].append({"gamestage" : gamestage ,"name" : board.getpiece(v2_oldpawn).name})  # add to piece to the players taken pile
+                        print(piecestaken)
+                        board.overwritepos(v2_oldpawn, data.piece(piecedict, "0"))
+                        board.pawnenpassandone = False
+
+                    if oldpiece.name == "king" and v2_piece.x + 2 == v2_oldpiece.x:  ## rook king swap left
+                        v2_rook = v2(v2_piece.x - 1, v2_piece.y)
+                        rook = board.getpiece(v2_rook)
+                        v2_newrook = v2(v2_oldpiece.x - 1, v2_piece.y)
+
+                        board.overwritepos(v2_rook, data.piece(piecedict, "0"))
+                        board.overwritepos(v2_newrook, data.piece(piecedict, rook.id))
+
+                    if oldpiece.name == "king" and v2_piece.x - 2 == v2_oldpiece.x:  ## rook king swap right
+                        v2_rook = v2(v2_piece.x + 2, v2_piece.y)
+                        rook = board.getpiece(v2_rook)
+                        v2_newrook = v2(v2_oldpiece.x + 1, v2_piece.y)
+
+                        board.overwritepos(v2_rook, data.piece(piecedict, "0"))
+                        board.overwritepos(v2_newrook, data.piece(piecedict, rook.id))
+
+
+
+                    board.saveboard(gamestage)
 
                     # test check
-                    kingpos = board.getkingpos(other[colour])
+                    if oldpiece.colour != "none":
+                        kingpos = board.getkingpos(other[oldpiece.colour])
 
-                    if move.checkpos(board, kingpos):
-                        print(other[colour], " is in check")
-                        board.check = True
-                        if move.checkcheckmate(board, other[colour], kingpos):
-                            print("checkmate,", colour, "has won")
-                    else:
-                        board.check = False
-                        if move.checkcheckmate(board, other[colour], kingpos):
-                            print("stalemate its a draw!")
+                        if move.checkpos(board, kingpos):
+                            print(other[oldpiece.colour], " is in check")
+                            board.check = True
+                            if move.checkcheckmate(board, kingpos):
+                                print("checkmate,", oldpiece.colour, "has won")
+                        else:
+                            board.check = False
+                            if move.checkcheckmate(board, kingpos):
+                                print("stalemate its a draw!")
 
                     # if in check test if player has any possible move
 
                     gamestage += 1  # next player
 
                 if board.check:
-                    gameDisplay.blit(checkImg,(kingpos.x * displayscale + offset.x, kingpos.y * displayscale + offset.y))
+                    gameDisplay.blit(checkImg, (kingpos.x * displayscale + offset.x, kingpos.y * displayscale + offset.y))
 
-                gui.displayBoard(displayscale, pieceImgdict, board, gameDisplay, piecesImg, offset)  # refresh board
+                #gui.displayBoard(displayscale, pieceImgdict, board, gameDisplay, piecesImg, offset)  # refresh board
+
+                players[0].send(HEADERSIZE, pickle.dumps(["displayboard", board.board]))
+                players[1].send(HEADERSIZE, pickle.dumps(["displayboard", board.board]))
+                print("sending display board to clients 1 and 2")
 
                 deselect = False  # allows another piece's movement to be viewed
 
             if not deselect and piece.colour == colour:
-
                 moves = move.getmoves(board, v2(x, y))
+                moves = move.correctmoves(board, v2(x, y), moves)
 
-                moves = move.correctmoves(board,colour,moves)
+                #gui.displayMoves(displayscale, moveImg, takeImg, gameDisplay, board, moves, offset)
 
-                gui.displayMoves(displayscale, moveImg, takeImg, gameDisplay, board, moves, offset)
+
+                players[gamestage % 2].send(HEADERSIZE, pickle.dumps(["displaymove", moves]))
 
                 v2_oldpiece = v2(x, y)
                 deselect = True
@@ -320,4 +311,3 @@ quit()
 ## if clicked a possible move spot
 ## move piece to that spot
 ## increment player n
-

@@ -1,6 +1,6 @@
 import data
 from data import v2
-
+import gui
 
 
 def vectorflipper(board, pos, mov,
@@ -31,49 +31,33 @@ def vectorflipper(board, pos, mov,
 class piecemoves:
     def rook(board, pos):
         moves = []
-        movespos = []
-        movespos += vectorflipper(board, pos, v2(0, 1), True)
-        movespos += vectorflipper(board, pos, v2(1, 0), True)
-        for mov in movespos:
-            moves.append(data.move(board, mov, pos))
+        moves += vectorflipper(board, pos, v2(0, 1), True)
+        moves += vectorflipper(board, pos, v2(1, 0), True)
         return moves
 
     def knight(board, pos):
         moves = []
-        movespos = []
-        movespos += vectorflipper(board, pos, v2(2, 1))
-        movespos += vectorflipper(board, pos, v2(1, 2))
-        for mov in movespos:
-            moves.append(data.move(board, mov, pos))
+        moves += vectorflipper(board, pos, v2(2, 1))
+        moves += vectorflipper(board, pos, v2(1, 2))
         return moves
 
     def bishop(board, pos):
         moves = []
-        movespos = []
-        movespos += vectorflipper(board, pos, v2(1, 1), True)
-        for mov in movespos:
-            moves.append(data.move(board, mov, pos))
+        moves += vectorflipper(board, pos, v2(1, 1), True)
         return moves
 
     def queen(board, pos):
         moves = []
-        movespos = []
-        movespos += vectorflipper(board, pos, v2(1, 1), True)
-        movespos += vectorflipper(board, pos, v2(0, 1), True)
-        movespos += vectorflipper(board, pos, v2(1, 0), True)
-        for mov in movespos:
-            moves.append(data.move(board, mov, pos))
+        moves += vectorflipper(board, pos, v2(1, 1), True)
+        moves += vectorflipper(board, pos, v2(0, 1), True)
+        moves += vectorflipper(board, pos, v2(1, 0), True)
         return moves
 
     def king(board, pos):
         moves = []
-        movespos = []
-        movespos += vectorflipper(board, pos, v2(1, 1))
-        movespos += vectorflipper(board, pos, v2(0, 1))
-        movespos += vectorflipper(board, pos, v2(1, 0))
-        for mov in movespos:
-            moves.append(data.move(board, mov, pos))
-
+        moves += vectorflipper(board, pos, v2(1, 1))
+        moves += vectorflipper(board, pos, v2(0, 1))
+        moves += vectorflipper(board, pos, v2(1, 0))
 
         leftrookdic = {"white": v2(0, 0), "black": v2(0, 7)}
         rightrookdic = {"white": v2(7, 0), "black": v2(7, 7)}
@@ -87,19 +71,16 @@ class piecemoves:
             v2_rook2plus = v2(leftrookpos.x + 2, leftrookpos.y)
 
             if board.getpiece(v2_rook1plus).name == "" and board.getpiece(v2_rook2plus).name == "":
-
-                kingsmove = data.move(board, v2_rook1plus, pos)
-                moves.append(kingsmove)
+                moves.append(v2_rook1plus)
 
         if board.unmovedpiece(rightrookpos) and board.unmovedpiece(pos) and not board.check:
             v2_rook1minus = v2(rightrookpos.x - 1, rightrookpos.y)
             v2_rook2minus = v2(rightrookpos.x - 2, rightrookpos.y)
             v2_rook3minus = v2(rightrookpos.x - 3, rightrookpos.y)
 
-            if board.getpiece(v2_rook1minus).name == "" and board.getpiece(v2_rook2minus).name == "" and board.getpiece(v2_rook3minus).name == "":
-
-                kingsmove = data.move(board, v2_rook2minus, pos)
-                moves.append(kingsmove)
+            if board.getpiece(v2_rook1minus).name == "" and board.getpiece(v2_rook2minus).name == "" and board.getpiece(
+                    v2_rook3minus).name == "":
+                moves.append(v2_rook2minus)
 
         return moves
 
@@ -117,31 +98,37 @@ class piecemoves:
         v2_xplus = v2(pos.x + 1, pos.y + d)
         v2_xminus = v2(pos.x - 1, pos.y + d)
 
-        if y1d in range(0, 8) and board.getpiece(v2_y1d).name == "" :  ## if piece.pos+(0, 1d) is empty move is possible
-            moves.append(data.move(board,v2_y1d,pos))
-        if y2d in range(0, 8) and board.getpiece(v2_y1d).name == "" and board.getpiece(v2_y2d).name == "" and pos.y in [1, 6] :  ## if piece.pos+(0, 2d) is empty and piece is at y = 1 or y = 6 move is possible
-            moves.append(data.move(board,v2_y2d,pos))
-        if y1d in range(0, 8) and pos.x != 7 and board.getpiece(v2_xplus).colour != piece.colour and board.getpiece(v2_xplus).name != "" :  ## if piece.pos+(1,d) is not empty and not its own colour move is possibl
-            moves.append(data.move(board,v2_xplus,pos))
-        if y1d in range(0, 8) and pos.x != 0 and board.getpiece(v2_xminus).colour != piece.colour and board.getpiece(v2_xminus).name != "" :  ## if piece.pos+(-1,d) is not empty and not its own colour move is possible
-            moves.append(data.move(board,v2_xminus,pos))
+        if y1d in range(0, 8) and board.getpiece(v2_y1d).name == "":  ## if piece.pos+(0, 1d) is empty move is possible
+            moves.append(v2_y1d)
+        if y2d in range(0, 8) and board.getpiece(v2_y1d).name == "" and board.getpiece(v2_y2d).name == "" and pos.y in [
+            1, 6]:  ## if piece.pos+(0, 2d) is empty and piece is at y = 1 or y = 6 move is possible
+            moves.append(v2_y2d)
+        if y1d in range(0, 8) and pos.x != 7 and board.getpiece(v2_xplus).colour != piece.colour and board.getpiece(
+                v2_xplus).name != "":  ## if piece.pos+(1,d) is not empty and not its own colour move is possibl
+            if board.getpiece(v2_xplus).name != "king":
+                moves.append(v2_xplus)
+        if y1d in range(0, 8) and pos.x != 0 and board.getpiece(v2_xminus).colour != piece.colour and board.getpiece(
+                v2_xminus).name != "":  ## if piece.pos+(-1,d) is not empty and not its own colour move is possible
+            if board.getpiece(v2_xminus).name != "king":
+                moves.append(v2_xminus)
 
         # pawn en passan
         if board.pawnenpassan:
 
-
+            board.pawnenpassandone = False
 
             v2_py1d = v2(board.pawnenpassanpos.x, board.pawnenpassanpos.y + d)
 
             v2_pxplus = v2(board.pawnenpassanpos.x + 1, board.pawnenpassanpos.y)
             v2_pxminus = v2(board.pawnenpassanpos.x - 1, board.pawnenpassanpos.y)
 
-            if v2_py1d.y in range(0, 8) and v2_pxminus.equal(pos) and board.getpiece(v2_py1d).name == "":  # needs a better simulate possible to work better
-                moves.append(data.move(board,v2_py1d,pos))
-
+            if v2_py1d.y in range(0, 8) and v2_pxminus.equal(pos) and board.getpiece(
+                    v2_py1d).name == "":  # needs a better simulate possible to work better
+                moves.append(v2_py1d)
+                board.pawnenpassandone = True
             elif v2_py1d.y in range(0, 8) and v2_pxplus.equal(pos) and board.getpiece(v2_py1d).name == "":
-                moves.append(data.move(board,v2_py1d,pos))
-
+                moves.append(v2_py1d)
+                board.pawnenpassandone = True
 
         return moves
 
@@ -164,6 +151,13 @@ def getmoves(board, pos, name=""):
         return piecemoves.pawn(board, pos)
 
 
+def correctmoves(board, pos, moves):
+    finalmoves = []
+    for move in moves:
+
+        if simulatepossible(board, pos, move):
+            finalmoves.append(move)
+    return finalmoves
 
 
 def checkpos(board, pos):  ## checks if a pos is in check
@@ -175,7 +169,8 @@ def checkpos(board, pos):  ## checks if a pos is in check
         moves = getmoves(board, pos, piecename)  # moves works because the pos being checked for in check
 
         for move in moves:  # each move
-            if move.topiece.name == piecename:  # if piece at move location same name as the piece being checked for check
+            if board.getpiece(
+                    move).name == piecename:  # if piece at move location same name as the piece being checked for check
                 return True
 
     # next is for stupid pawns
@@ -198,33 +193,54 @@ def checkpos(board, pos):  ## checks if a pos is in check
     return False
     # return true if piece of other colour can move here
 
-def correctmoves(board, colour, moves):
-    feasiblemoves = []
-    for mov in moves:
 
-        mov.perform(board)
-        kingpos = board.getkingpos(colour)
+def simulatepossible(board, frompos,
+                     topos):  # checks if a move being done will result in the king being in check after the move is done
 
-        if not checkpos(board, kingpos):
-            feasiblemoves.append(mov)
+    frompiece = board.getpiece(frompos)
+    topiece = board.getpiece(topos)
 
-        mov.unperform(board)
+    colour = board.getpiece(frompos).colour
 
-    return feasiblemoves
+    board.overwritepos(frompos, data.piece(board.piecedict, "0"))
+    board.overwritepos(topos, data.piece(board.piecedict, frompiece.id))  # replace piece
 
+    if board.pawnenpassandone and frompos.x != topos.x:
+        pawnpiece = board.getpiece(board.pawnenpassanpos)
+        if pawnpiece.name == "pawn":
+            board.overwritepos(board.pawnenpassanpos, data.piece(board.piecedict, "0"))
 
-def checkcheckmate(board, colour, kingpos):
-    pieces = board.getpiecespos(colour)
-    moves = []
-    for pos in pieces:
-        allmoves = getmoves(board, pos)
+    kingpos = board.getkingpos(colour)
+    # gets the kings position (if the king is the piece being tested when its moved it gets its new pos)
+    try:
+        kingnotincheck = not checkpos(board, kingpos)
+    except:
+        print(kingpos.x, kingpos.y)
 
-        feasiblemoves = correctmoves( board, colour, allmoves)
-        moves += feasiblemoves
+    kingnotincheck = not checkpos(board, kingpos)
 
-    if len(moves) == 0:
+    board.overwritepos(topos, data.piece(board.piecedict, topiece.id))
+    board.overwritepos(frompos, data.piece(board.piecedict, frompiece.id))
+
+    if board.pawnenpassandone and frompos.x != topos.x and pawnpiece.name == "pawn":
+        board.overwritepos(board.pawnenpassanpos, data.piece(board.piecedict, pawnpiece.id))
+
+    if kingnotincheck:
         return True
-    return False
+
+    return False  # this code is quite messy but works just fine (writing move, checking if king in check then unwriting move)
+
+
+def checkcheckmate(board, kingpos):
+    piece = board.getpiece(kingpos)
+    pieces = board.getpiecespos(piece.colour)
+
+    for pos in pieces:
+        moves = getmoves(board, pos)
+        moves = correctmoves(board, pos, moves)
+        if len(moves) != 0:
+            return False
+    return True
 
 
 def getallmoves(board, colour):
@@ -242,10 +258,5 @@ def getallmoves(board, colour):
         moves.append(correctmoves(board, pos, posmoves))
 
     return moves
-
-def searchmove(moves, v2):
-    for move in moves:
-        if move.to.x == v2.x and move.to.y == v2.y:
-            return move
 
 # 200
