@@ -1,0 +1,34 @@
+{
+  "piecedict":
+    {
+      "0" : {"name" : "", "colour" : "none", "unicode" : " "},
+
+
+
+      "1" : {"name" : "king", "colour" : "white", "unicode" : "U265A", "FEN":""},
+      "2" : {"name" : "queen", "colour" : "white", "unicode" : "U2655", "FEN":""},
+      "3" : {"name" : "bishop", "colour" : "white", "unicode" : "U265D", "FEN":""},
+      "4" : {"name" : "knight", "colour" : "white", "unicode" : "U265E", "FEN":""},
+      "5" : {"name" : "rook", "colour" : "white", "unicode" :  "U265C", "FEN":""},
+      "6" : {"name" : "pawn", "colour" : "white", "unicode" : "U265F", "FEN":""},
+
+      "7" : {"name" : "king", "colour" : "black", "unicode" : "U2654", "FEN":""},
+      "8" : {"name" : "queen", "colour" : "black", "unicode" : "U2655", "FEN":""},
+      "9" : {"name" : "bishop", "colour" : "black", "unicode" : "U2657", "FEN":""},
+      "10" : {"name" : "knight", "colour" : "black", "unicode" : "U2658", "FEN":""},
+      "11" : {"name" : "rook", "colour" : "black", "unicode" : "U2656", "FEN":""},
+      "12" : {"name" : "pawn", "colour" : "black", "unicode" : "U2659", "FEN":""}
+    },
+
+    "boardlayout" :
+    [
+      [ "5", "4", "3", "1", "2", "3", "4", "5"],
+      [ "6", "6", "6", "6", "6", "6", "6", "6"],
+      [ "0", "0", "0", "0", "0", "0", "0", "0"],
+      [ "0", "0", "0", "0", "0", "0", "0", "0"],
+      [ "0", "0", "0", "0", "0", "0", "0", "0"],
+      [ "0", "0", "0", "0", "0", "0", "0", "0"],
+      ["12","12","12","12","12","12","12","12"],
+      ["11","10", "9", "7", "8", "9","10","11"]
+    ]
+}
