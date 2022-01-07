@@ -21,12 +21,12 @@ def displayBoard(scale, pieceImgdict, board, gameDisplay, piecesImg, offsetpos =
 def displayMoves(scale, moveImg, takeImg, gameDisplay, board, moves, offsetpos = v2(0,0)):
     for move in moves:
 
-        piece = move.topiece
+        piece = board.getpiece(move)
 
         if piece.name == "":
-            gameDisplay.blit(moveImg, (move.to.x*scale + (0.25 * scale) + offsetpos.x, move.to.y*scale + (0.25 * scale) + offsetpos.y))
+            gameDisplay.blit(moveImg, (move.x*scale + (0.25 * scale) + offsetpos.x, move.y*scale + (0.25 * scale) + offsetpos.y))
         else:
-            gameDisplay.blit(takeImg, (move.to.x*scale + (0.25 * scale) + offsetpos.x, move.to.y*scale + (0.25 * scale) + offsetpos.y))
+            gameDisplay.blit(takeImg, (move.x*scale + (0.25 * scale) + offsetpos.x, move.y*scale + (0.25 * scale) + offsetpos.y))
 
 def displaypawnswap(scale, pieceImgdict, pieceImg, pos, gameDisplay, offsetpos):
     if pos.y == 7:
