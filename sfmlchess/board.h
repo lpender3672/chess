@@ -2,6 +2,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include<vector>
 
 #include "piece.h"
 
@@ -11,15 +12,13 @@ using namespace std;
 class board {
 public:
 
-	
-
 	board();
-	board(int const& boardvar);
+	board(vector<piece> boardvar);
 
 	piece getPiece(int const& i);
 
 private:
 
-	piece layout;
+	vector<piece> layout;
 
 };

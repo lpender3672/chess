@@ -1,23 +1,29 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <vector>
 
 #include "board.h"
 
 board::board() {
-	int boardvar[64] = { 1, 2, 3, 5, 4, 3, 2, 1,
-						 6, 6, 6, 6, 6, 6, 6, 6,
-						 0, 0, 0, 0, 0, 0, 0, 0,
-						 0, 0, 0, 0, 0, 0, 0, 0,
-						 0, 0, 0, 0, 0, 0, 0, 0,
-						 0, 0, 0, 0, 0, 0, 0, 0,
-						12,12,12,12,12,12,12,12,
-						 7, 8, 9,10,11, 9, 8, 7 };
+
+	layout = vector<piece>{ piece(1), piece(2), piece(3), piece(5), piece(4), piece(3), piece(2), piece(1),
+							piece(6), piece(6), piece(6), piece(6), piece(6), piece(6), piece(6), piece(6),
+							piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0),
+							piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0),
+							piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0),
+							piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0),
+							piece(12), piece(12), piece(12), piece(12), piece(12), piece(12), piece(12), piece(12),
+							piece(7), piece(8), piece(9), piece(10), piece(11), piece(9), piece(8), piece(7) };
 }
 
-board::board(int const& _boardvar) {
+board::board(vector<piece> _layout) {
 
-	boardvar = _boardvar;
+	layout = _layout;
+}
+
+piece board::getPiece(int const& i) {
+	return layout[i];
 }
 
 std::list<std::list<std::list<int>>> vectorflipper(int mov_v2[2], int pos_v2[2], bool infinite) {

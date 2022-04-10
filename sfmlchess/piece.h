@@ -22,6 +22,7 @@ private:
 
 	int id;
 	std::string name;
+	std::string colour;
 
 
 
