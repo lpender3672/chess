@@ -7,24 +7,47 @@
 
 board::board() {
 
-	layout = vector<piece>{ piece(1), piece(2), piece(3), piece(5), piece(4), piece(3), piece(2), piece(1),
+	layout = vector<piece>{ piece(3), piece(4), piece(5), piece(2), piece(1), piece(5), piece(4), piece(3),
 							piece(6), piece(6), piece(6), piece(6), piece(6), piece(6), piece(6), piece(6),
 							piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0),
 							piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0),
 							piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0),
 							piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0), piece(0),
 							piece(12), piece(12), piece(12), piece(12), piece(12), piece(12), piece(12), piece(12),
-							piece(7), piece(8), piece(9), piece(10), piece(11), piece(9), piece(8), piece(7) };
+							piece(9), piece(11), piece(10), piece(7), piece(8), piece(10), piece(11), piece(9) };
 }
 
-board::board(vector<piece> _layout) {
+board::board(vector<piece> _layout, sf::Sprite _boardSprite, sf::Sprite _pieceSprites) {
 
 	layout = _layout;
+	boardSprite = _boardSprite;
+	pieceSprites = _pieceSprites;
+
+	unitWidth = boardSprite.getGlobalBounds().width / 8;
+	unitHeight = boardSprite.getGlobalBounds().height / 8;
+
+	widthScale = unitWidth / (pieceSprites.getGlobalBounds().width / 6);
+	heightScale = unitHeight / (pieceSprites.getGlobalBounds().height / 2);
+
+
 }
 
 piece board::getPiece(int const& i) {
 	return layout[i];
 }
+
+void board::update(sf::RenderWindow &window) {
+	for (int i = 0; i < layout.size(); i++)
+	{
+		piece p = getPiece(i);
+		sf::Sprite psprite = p.getSprite(pieceSprites);
+		psprite.setScale(widthScale, heightScale);
+		psprite.setPosition((i % 8) * unitWidth, (i / 8) * unitHeight);
+		window.draw(psprite);
+	}
+}
+
+
 
 std::list<std::list<std::list<int>>> vectorflipper(int mov_v2[2], int pos_v2[2], bool infinite) {
 	int unit_identity_list[4][2] = { {1,1}, {-1,1}, {1,-1}, {-1, -1} };
@@ -54,30 +77,4 @@ std::list<std::list<std::list<int>>> vectorflipper(int mov_v2[2], int pos_v2[2],
 
 	}
 	return moves;
-}
-
-
-std::map<int, std::map<std::string, std::string>> getmap() {
-
-	std::map<int, std::map<std::string, std::string>> identity;
-
-	std::string piecenames[6] = { "rook", "knight", "bishop", "king", "queen", "pawn" };
-
-	for (int i = 0; i < 12; i++)
-	{
-		std::string colour;
-		std::map<std::string, std::string> piece;
-		if (i < 6) {
-			colour = "white";
-		}
-		else {
-			colour = "black";
-		}
-
-		piece["colour"] = colour;
-		piece["name"] = piecenames[i % 6];
-
-		identity[i] = piece;
-	}
-	return identity;
 }

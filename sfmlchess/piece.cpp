@@ -1,8 +1,8 @@
 
-
 #include <iostream>
 #include <list>
 #include <map>
+#include <SFML\Graphics.hpp>
 
 #include "piece.h"
 
@@ -11,25 +11,44 @@ piece::piece() {
 }
 
 piece::piece(int const& _id) {
-	std::string piecenames[6] = { "rook", "knight", "bishop", "king", "queen", "pawn" };
+	std::string piecenames[6] = {"king", "queen", "bishop", "knight", "rook", "pawn" };
 	id = _id;
-	name = piecenames[_id];
-
-	if (_id == 0) {
+	
+	if (id == 0) {
+		colour = "none";
 		name = "none";
 	}
-	else if (_id <= 6) {
-		colour = "white";
-	}
 	else {
-		colour = "black";
+		name = piecenames[(_id - 1) % 6];
+
+		if (id <= 6) {
+			colour = "white";
+		}
+		else {
+			colour = "black";
+		}
 	}
+
+	
 }
 
 int piece::getID() {
 	return id;
 }
 
-std::string piece::getName()  {
-	return name;
+
+sf::Sprite piece::getSprite(sf::Sprite const& pieceSprites) {
+
+	int unitHeight = pieceSprites.getGlobalBounds().height / 2;
+	int unitWidth = pieceSprites.getGlobalBounds().width / 6;
+
+	sf::Sprite pieceSprite = pieceSprites;
+
+
+	int x = (id - 1) % 6;
+	int y = (id - 1) / 6;
+
+	pieceSprite.setTextureRect(sf::IntRect(x * unitWidth, y * unitHeight, unitWidth, unitHeight));
+
+	return pieceSprite;
 }

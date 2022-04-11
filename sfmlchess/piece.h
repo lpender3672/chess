@@ -3,6 +3,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <SFML\Graphics.hpp>
 
 using namespace std;
 
@@ -10,20 +11,19 @@ using namespace std;
 class piece {
 public:
 
-
-
 	piece();
 	piece(int const& id);
 
 	int getID();
-	std::string getName();
+
+	std::string name;
+	std::string colour;
+
+	sf::Sprite getSprite(sf::Sprite const& boardSprite);
 
 private:
 
 	int id;
-	std::string name;
-	std::string colour;
-
-
+	
 
 };
