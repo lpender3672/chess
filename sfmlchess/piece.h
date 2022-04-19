@@ -18,12 +18,16 @@ public:
 
 	std::string name;
 	std::string colour;
+	
+	sf::Texture texture;
+	sf::Sprite sprite;
+	sf::Sprite& getSprite();
 
-	sf::Sprite getSprite(sf::Sprite const& boardSprite);
+	sf::Sprite createSprite(sf::Sprite const& boardSprite);
+
 
 private:
 
 	int id;
-	
 
 };

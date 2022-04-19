@@ -28,7 +28,14 @@ piece::piece(int const& _id) {
 			colour = "black";
 		}
 	}
-
+	
+	sf::Texture pieceTextures;
+	pieceTextures.loadFromFile("sprites/pieces.png");
+	sf::Sprite pieceSprites;
+	pieceSprites.setTexture(pieceTextures);
+	
+	sprite = createSprite(pieceSprites);
+	texture = *(sprite.getTexture());
 	
 }
 
@@ -36,19 +43,28 @@ int piece::getID() {
 	return id;
 }
 
+sf::Sprite& piece::getSprite() {
+	return sprite;
+}
 
-sf::Sprite piece::getSprite(sf::Sprite const& pieceSprites) {
+
+sf::Sprite piece::createSprite(sf::Sprite const& pieceSprites) {
 
 	int unitHeight = pieceSprites.getGlobalBounds().height / 2;
 	int unitWidth = pieceSprites.getGlobalBounds().width / 6;
 
 	sf::Sprite pieceSprite = pieceSprites;
 
+	if (id == 0) {
+		pieceSprite.setTextureRect(sf::IntRect(0, 0, 0, 0));
+		return pieceSprite;
+	}
+	else {
+		int x = (id - 1) % 6;
+		int y = (id - 1) / 6;
 
-	int x = (id - 1) % 6;
-	int y = (id - 1) / 6;
+		pieceSprite.setTextureRect(sf::IntRect(x * unitWidth, y * unitHeight, unitWidth, unitHeight));
 
-	pieceSprite.setTextureRect(sf::IntRect(x * unitWidth, y * unitHeight, unitWidth, unitHeight));
-
-	return pieceSprite;
+		return pieceSprite;
+	}
 }

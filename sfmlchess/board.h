@@ -15,8 +15,11 @@ public:
 	board();
 	board(vector<piece> boardvar, sf::Sprite _boardSprite, sf::Sprite _pieceSprites);
 
-	piece getPiece(int const& i);
+	piece& getPiece(int const& i);
 	void update(sf::RenderWindow &window);
+	
+	sf::Vector2i IDtoV2(int const& i);
+	int V2toID(sf::Vector2i const& v);
 
 	vector<piece> layout;
 
@@ -25,6 +28,9 @@ public:
 
 	int unitWidth;
 	int unitHeight;
+
+	vector<int> getMoves(int const& index);
+
 
 private:
 

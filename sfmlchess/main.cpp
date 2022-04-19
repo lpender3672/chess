@@ -54,10 +54,9 @@ int main() {
 			if (event.type == sf::Event::MouseButtonPressed) {
 				if (event.mouseButton.button == sf::Mouse::Left && !lock_click) {
 
-					int x = event.mouseButton.x / Board.unitWidth;
-					int y = event.mouseButton.y / Board.unitHeight;
+					sf::Vector2i pos = sf::Vector2i(event.mouseButton.x / Board.unitWidth, event.mouseButton.y / Board.unitHeight);
 
-					int index = x + 8 * y;
+					int index = Board.V2toID(pos);
 
 					piece p = Board.getPiece(index);
 					
