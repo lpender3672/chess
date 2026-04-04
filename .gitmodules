@@ -1,0 +1,3 @@
+[submodule "Chess-EPDs"]
+	path = Chess-EPDs
+	url = https://github.com/ChrisWhittington/Chess-EPDs.git
