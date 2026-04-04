@@ -1,0 +1,5 @@
+build/
+data/*.pgn
+data/*.zst
+data/*.bz2
+data/*.gz
