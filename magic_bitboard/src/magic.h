@@ -1,6 +1,10 @@
 #pragma once
 #include "types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* ── Magic bitboard lookup for sliding pieces ──────────────────────────
  *
  *  For each square, a magic number M is chosen such that:
@@ -46,3 +50,7 @@ static inline Bitboard bishop_attacks(Square sq, Bitboard occ) {
 static inline Bitboard queen_attacks(Square sq, Bitboard occ) {
     return rook_attacks(sq, occ) | bishop_attacks(sq, occ);
 }
+
+#ifdef __cplusplus
+}
+#endif

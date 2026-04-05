@@ -1,6 +1,10 @@
 #pragma once
 #include "types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* ── Bit utilities ─────────────────────────────────────────────────────── */
 static inline Bitboard sq_bb(Square s)        { return (Bitboard)1 << s; }
 static inline int      bb_empty(Bitboard b)   { return b == 0; }
@@ -30,3 +34,7 @@ void bb_init(void);  /* populate all static tables */
 /* ── Rank / file masks ─────────────────────────────────────────────────── */
 extern const Bitboard RANK_BB[8];
 extern const Bitboard FILE_BB[8];
+
+#ifdef __cplusplus
+}
+#endif

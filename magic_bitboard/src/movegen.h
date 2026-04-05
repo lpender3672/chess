@@ -2,6 +2,10 @@
 #include "types.h"
 #include "position.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     GEN_ALL,       /* pseudo-legal + will filter check */
     GEN_CAPTURES,  /* captures and promotions only */
@@ -21,3 +25,7 @@ Move move_from_uci(const Position *pos, const char *uci);
 
 /* Parses SAN (Standard Algebraic Notation) move string. */
 Move move_from_san(Position *pos, const char *san);
+
+#ifdef __cplusplus
+}
+#endif

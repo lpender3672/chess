@@ -118,6 +118,66 @@ void pos_from_fen(Position *pos, const char *fen) {
     sscanf(fen, "%d %d", &pos->halfmove, &pos->fullmove);
 }
 
+/* ── FEN serialisation ─────────────────────────────────────────────────── */
+void pos_to_fen(const Position *pos, char *buf, size_t len) {
+    static const char piece_chars[COLOR_NB][PIECE_NB] = {
+        { 'P','N','B','R','Q','K' },   /* WHITE */
+        { 'p','n','b','r','q','k' },   /* BLACK */
+    };
+
+    char tmp[128];
+    char *p = tmp;
+
+    /* piece placement */
+    for (int rank = 7; rank >= 0; rank--) {
+        int empty = 0;
+        for (int file = 0; file < 8; file++) {
+            Square sq = (Square)(rank * 8 + file);
+            Bitboard b = sq_bb(sq);
+            char c = 0;
+            for (int col = 0; col < COLOR_NB && !c; col++)
+                for (int pt = 0; pt < PIECE_NB && !c; pt++)
+                    if (pos->pieces[col][pt] & b)
+                        c = piece_chars[col][pt];
+            if (c) {
+                if (empty) *p++ = (char)('0' + empty), empty = 0;
+                *p++ = c;
+            } else {
+                empty++;
+            }
+        }
+        if (empty) *p++ = (char)('0' + empty);
+        if (rank) *p++ = '/';
+    }
+    *p++ = ' ';
+
+    /* side to move */
+    *p++ = (pos->side == WHITE) ? 'w' : 'b';
+    *p++ = ' ';
+
+    /* castling */
+    if (pos->castling) {
+        if (pos->castling & CASTLE_WK) *p++ = 'K';
+        if (pos->castling & CASTLE_WQ) *p++ = 'Q';
+        if (pos->castling & CASTLE_BK) *p++ = 'k';
+        if (pos->castling & CASTLE_BQ) *p++ = 'q';
+    } else {
+        *p++ = '-';
+    }
+    *p++ = ' ';
+
+    /* en passant */
+    if (pos->ep_square != SQ_NONE) {
+        *p++ = (char)('a' + (pos->ep_square % 8));
+        *p++ = (char)('1' + (pos->ep_square / 8));
+    } else {
+        *p++ = '-';
+    }
+
+    *p = '\0';
+    snprintf(buf, len, "%s %d %d", tmp, pos->halfmove, pos->fullmove);
+}
+
 /* ── Make move ─────────────────────────────────────────────────────────── */
 void pos_make_move(Position *pos, Move m, UndoInfo *undo) {
     Color    us    = pos->side;

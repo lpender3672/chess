@@ -1,6 +1,10 @@
 #pragma once
 #include "types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define FEN_STARTPOS "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 /* ── Castling rights bitmask ───────────────────────────────────────────── */
@@ -46,3 +50,7 @@ PieceType pos_piece_on(const Position *pos, Square sq);
 
 /* Returns 1 if square sq is attacked by any piece of color 'by' */
 int sq_attacked(const Position *pos, Square sq, Color by);
+
+#ifdef __cplusplus
+}
+#endif

@@ -3,6 +3,10 @@
 #include "movegen.h"
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* ── PGN game record ───────────────────────────────────────────────────── */
 #define PGN_MAX_MOVES  512
 #define PGN_TAG_LEN    128
@@ -33,3 +37,7 @@ void pgn_close(PgnParser *p);
 
 /* Reads the next game into g. Returns 1 on success, 0 on EOF, -1 on error. */
 int  pgn_next_game(PgnParser *p, PgnGame *g);
+
+#ifdef __cplusplus
+}
+#endif
