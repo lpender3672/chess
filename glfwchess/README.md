@@ -1,6 +1,8 @@
 # glfwchess
 
-Minimal GLFW + C++ starter project that links the sibling `magic_bitboard` engine.
+![glfwchess](app.png)
+
+Minimal GLFW + C++ chess GUI that links the sibling `magic_bitboard` engine.
 
 ## Layout
 
